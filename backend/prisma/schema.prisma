@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+  seed     = "ts-node prisma/seed.ts"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model categories {
+  id            String    @id @default(uuid()) @db.Uuid
+  category_name String    @unique
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
+  products      product[]
+}
+
+model masterbox {
+  master_box_id        String          @id @default(uuid()) @db.Uuid
+  master_box_name      String?         @unique
+  scale_box            String?
+  height               Float?
+  length               Float?
+  width                Float?
+  cubic_centimeter_box Float?
+  create_by            String?
+  create_date          DateTime        @default(now())
+  update_by            String?
+  update_date          DateTime?       @updatedAt
+  description          String?
+  code_box             String?
+  image_path           String?
+  cal_box              cal_box[]
+  cal_msproduct        cal_msproduct[]
+}
+
+model masterproduct {
+  master_product_id        String          @id @default(uuid()) @db.Uuid
+  master_product_name      String?
+  scale_product            String?
+  height                   Float?
+  length                   Float?
+  width                    Float?
+  cubic_centimeter_product Float?
+  create_by                String?
+  create_date              DateTime        @default(now())
+  update_by                String?
+  update_date              DateTime?       @updatedAt
+  description              String?
+  sort_by                  Int?
+  code_product             String?         @unique
+  image_path               String?
+  cal_box                  cal_box[]
+  cal_msproduct            cal_msproduct[]
+}
+
+model masterwarehouse {
+  height                     Float?
+  width                      Float?
+  create_by                  String?
+  create_date                DateTime?           @default(now())
+  update_by                  String?
+  update_date                DateTime?           @updatedAt
+  length                     Float?
+  cubic_centimeter_warehouse Float?
+  master_warehouse_id        String              @id @default(uuid()) @db.Uuid
+  master_warehouse_name      String?
+  description                String?
+  cal_warehouse              cal_warehouse[]
+  masterzone                 masterzone[]
+  shelf_box_storage          shelf_box_storage[]
+}
+
+model masterzone {
+  master_zone_id        String                     @id @default(uuid()) @db.Uuid
+  master_zone_name      String?
+  height                Float?
+  length                Float?
+  width                 Float?
+  cubic_centimeter_zone Float?
+  description           String?
+  create_by             String?
+  create_date           DateTime?                  @default(now())
+  update_by             String?
+  update_date           DateTime?                  @updatedAt
+  master_warehouse_id   String?                    @db.Uuid
+  cal_warehouses        MasterZoneOnCalWarehouse[]
+  WarehouseZones        WarehouseZones[]
+  racks                 masterrack[]
+  masterwarehouse       masterwarehouse?           @relation(fields: [master_warehouse_id], references: [master_warehouse_id])
+  shelf_box_storage     shelf_box_storage[]
+}
+
+model cal_warehouse {
+   cal_warehouse_id      String                     @id @default(uuid()) @db.Uuid
+  status                Boolean?                   @default(false)
+  status_date           DateTime?                  @default(now())
+  status_by             String?
+  create_by             String?
+  create_date           DateTime?                  @default(now())
+  update_by             String?
+  update_date           DateTime?                  @updatedAt
+  sort_by               Int?
+  master_warehouse_id   String?                    @db.Uuid
+  document_warehouse_no String                     @unique
+  cal_msproduct_id      String?                    @db.Uuid
+  masterzones           MasterZoneOnCalWarehouse[]
+  cal_msproduct         cal_msproduct?             @relation(fields: [cal_msproduct_id], references: [document_product_id])
+  masterwarehouse       masterwarehouse?           @relation(fields: [master_warehouse_id], references: [master_warehouse_id])
+  shelf_box_storage     shelf_box_storage[]
+}
+
+model MasterZoneOnCalWarehouse {
+  cal_warehouse_id String        @db.Uuid
+  master_zone_id   String        @db.Uuid
+  cal_warehouse    cal_warehouse @relation(fields: [cal_warehouse_id], references: [cal_warehouse_id])
+  masterzone       masterzone    @relation(fields: [master_zone_id], references: [master_zone_id])
+
+  @@id([cal_warehouse_id, master_zone_id])
+}
+
+model masterrack {
+  master_rack_id        String             @id @default(uuid()) @db.Uuid
+  master_rack_name      String?
+  height                Float?
+  length                Float?
+  width                 Float?
+  cubic_centimeter_rack Float?
+  description           String?
+  master_zone_id        String?            @db.Uuid
+  create_by             String?
+  create_date           DateTime?          @default(now())
+  update_by             String?
+  update_date           DateTime?          @updatedAt
+  masterzone            masterzone?        @relation(fields: [master_zone_id], references: [master_zone_id])
+  shelves               mastershelf[]
+  stored_boxes          rack_box_storage[]
+
+  shelf_box_storage shelf_box_storage[] @relation("ShelfBoxToRack")
+  
+}
+
+model mastershelf {
+  master_shelf_id        String              @id @default(uuid()) @db.Uuid
+  master_shelf_name      String?
+  shelf_level            Int?
+  height                 Float?
+  length                 Float?
+  width                  Float?
+  cubic_centimeter_shelf Float?
+  description            String?
+  master_rack_id         String?             @db.Uuid
+  create_by              String?
+  create_date            DateTime?           @default(now())
+  update_by              String?
+  update_date            DateTime?           @updatedAt
+  masterrack             masterrack?         @relation(fields: [master_rack_id], references: [master_rack_id])
+  stored_boxes           shelf_box_storage[]
+}
+
+model product {
+  id           String     @id @default(uuid()) @db.Uuid
+  product_name String
+  price        Float
+  category_id  String     @db.Uuid
+  created_at   DateTime   @default(now())
+  updated_at   DateTime?  @updatedAt
+  category     categories @relation(fields: [category_id], references: [id])
+}
+
+model user {
+  users_id    String    @id @default(uuid())
+  fullname    String?
+  age         Int
+  address     String?
+  username    String    @unique
+  password    String
+  status_role String?
+  create_date DateTime? @default(now())
+  create_by   String?
+  update_by   String?
+  update_date DateTime? @updatedAt
+}
+
+model cal_msproduct {
+    document_product_id                                String          @id @default(uuid()) @db.Uuid
+  create_by                                          String?
+  create_date                                        DateTime?       @default(now())
+  update_by                                          String?
+  update_date                                        DateTime?       @updatedAt
+  status                                             Boolean?        @default(false)
+  status_by                                          String?
+  status_date                                        DateTime?       @default(now())
+  master_box_id                                      String?         @db.Uuid
+  master_product_id                                  String?         @db.Uuid
+  document_product_no                                String          @unique
+  sort_by                                            Int?
+  cal_box                                            cal_box[]
+  cal_box_cal_box_document_product_noTocal_msproduct cal_box[]       @relation("cal_box_document_product_noTocal_msproduct")
+  masterbox                                          masterbox?      @relation(fields: [master_box_id], references: [master_box_id])
+  masterproduct                                      masterproduct?  @relation(fields: [master_product_id], references: [master_product_id])
+  cal_warehouses                                     cal_warehouse[]
+}
+
+model cal_box {
+  cal_box_id                                               String              @id @default(uuid()) @db.Uuid
+  code_box                                                 String?
+  master_product_name                                      String?
+  code_product                                             String?
+  create_by                                                String?
+  create_date                                              DateTime?           @default(now())
+  update_by                                                String?
+  update_date                                              DateTime?           @updatedAt
+  master_box_id                                            String?             @db.Uuid
+  master_box_name                                          String?
+  master_product_id                                        String?             @db.Uuid
+  count                                                    Int?
+  cubic_centimeter_box                                     Int?
+  box_no                                                   Int?
+  document_product_no                                      String?
+  document_product_id                                      String?             @db.Uuid
+  cal_msproduct                                            cal_msproduct?      @relation(fields: [document_product_id], references: [document_product_id], onDelete: Cascade)
+  cal_msproduct_cal_box_document_product_noTocal_msproduct cal_msproduct?      @relation("cal_box_document_product_noTocal_msproduct", fields: [document_product_no], references: [document_product_no], onDelete: Cascade)
+  masterbox                                                masterbox?          @relation(fields: [master_box_id], references: [master_box_id])
+  masterproduct                                            masterproduct?      @relation(fields: [master_product_id], references: [master_product_id])
+  rack_storage                                             rack_box_storage[]
+  shelf_storage                                            shelf_box_storage[]
+  group_box                                                group_box[]         @relation("cal_boxTogroup_box")
+}
+
+model group_box {
+  group_box_id        String    @id @default(uuid()) @db.Uuid
+  document_product_no String?
+  box_no              Int?
+  cal_box             cal_box[] @relation("cal_boxTogroup_box")
+}
+
+model rack_box_storage {
+  storage_id           String     @id @default(uuid()) @db.Uuid
+  master_rack_id       String     @db.Uuid
+  cal_box_id           String     @db.Uuid
+  stored_date          DateTime   @default(now())
+  stored_by            String?
+  position             Int?
+  status               String     @default("stored")
+  count                Int?
+  cubic_centimeter_box Float?
+  document_product_no  String?
+  total_volume         Float?
+  box                  cal_box    @relation(fields: [cal_box_id], references: [cal_box_id])
+  rack                 masterrack @relation(fields: [master_rack_id], references: [master_rack_id])
+
+  @@unique([master_rack_id, cal_box_id])
+  @@index([document_product_no])
+}
+
+model shelf_box_storage {
+  storage_id            String           @id @default(uuid()) @db.Uuid
+  master_shelf_id       String           @db.Uuid
+  cal_box_id            String           @db.Uuid
+  stored_date           DateTime         @default(now())
+  stored_by             String?
+  count                 Int?
+  cubic_centimeter_box  Float?
+  cal_warehouse_id   String?    @db.Uuid
+  position              Int?
+  status                String           @default("stored")
+  total_volume          Float
+  export                Boolean          @default(false)
+  export_date           DateTime?
+  master_warehouse_id   String?          @db.Uuid
+  master_zone_id        String?          @db.Uuid
+  cal_box               cal_box          @relation(fields: [cal_box_id], references: [cal_box_id])
+  cal_warehouse         cal_warehouse?   @relation(fields: [cal_warehouse_id], references: [cal_warehouse_id], onDelete: Cascade)
+  mastershelf           mastershelf      @relation(fields: [master_shelf_id], references: [master_shelf_id])
+  masterwarehouse       masterwarehouse? @relation(fields: [master_warehouse_id], references: [master_warehouse_id])
+  masterzone            masterzone?      @relation(fields: [master_zone_id], references: [master_zone_id])
+  master_rack_id String @db.Uuid
+masterrack masterrack @relation("ShelfBoxToRack", fields: [master_rack_id], references: [master_rack_id])
+  @@index([cal_warehouse_id])
+  @@index([master_warehouse_id])
+  @@index([master_zone_id])
+  @@index([master_rack_id])
+}
+
+model WarehouseZones {
+  A          String     @db.Uuid
+  B          String     @db.Uuid
+  masterzone masterzone @relation(fields: [B], references: [master_zone_id], onDelete: Cascade)
+
+  @@id([A, B], map: "_WarehouseZones_AB_pkey")
+  @@index([B], map: "_WarehouseZones_B_index")
+  @@map("_WarehouseZones")
+}
