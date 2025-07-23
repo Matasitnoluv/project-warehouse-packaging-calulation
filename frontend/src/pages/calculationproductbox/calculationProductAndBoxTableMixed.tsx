@@ -28,15 +28,15 @@ const CalculationProductAndBoxTableMixed = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                         <div>
                             <h2 className="text-3xl font-bold text-gray-800 mb-2">Mixed Box Calculation Records</h2>
-                            <p className="text-gray-600">Manage your mixed product and box calculations</p>
+                            <p className="text-gray-600 mb-4 lg:mb-0">Manage your mixed product and box calculations</p>
                         </div>
-                        <div className="flex gap-4">
+                        <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => navigate("/calculationproductbox")}
-                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200"
+                                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2.5 px-4 rounded-lg transition-all duration-200 w-full lg:w-auto"
                             >
                                 <ArrowLeft size={20} />
                                 Back to Calculator
