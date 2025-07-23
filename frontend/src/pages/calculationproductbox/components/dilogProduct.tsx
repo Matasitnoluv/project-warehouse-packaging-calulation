@@ -260,7 +260,7 @@ const DialogProduct = ({
                                                     ? 'text-red-500 font-bold'
                                                     : ''
                                                     }`}>
-                                                    {product.scale_product}
+                                                    {product.width} * {product.length} * {product.height}
                                                 </Table.Cell>
                                                 <Table.Cell className={`px-4 py-3 text-right font-mono whitespace-nowrap ${(selectedBoxes || []).length > 0 && (selectedBoxes || [])[0] && product.cubic_centimeter_product > (selectedBoxes || [])[0].cubic_centimeter_box
                                                     ? 'text-red-500 font-bold'
