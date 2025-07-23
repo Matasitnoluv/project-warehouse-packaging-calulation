@@ -190,22 +190,22 @@ const CalWarehouseTable = () => {
             <div className="max-w-7xl mx-auto">
                 {/* Header Section */}
                 <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                    <div className="flex justify-between items-center">
+                    <div className="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
                         <div>
                             <h2 className="text-3xl font-bold text-gray-800 mb-2">Calculation Records</h2>
-                            <p className="text-gray-600">Manage your warehouse and box calculations</p>
+                            <p className="text-gray-600 mb-4 lg:mb-0">Manage your warehouse and box calculations</p>
                         </div>
-                        <div className="flex gap-4 items-center">
+                        <div className="flex flex-col lg:flex-row gap-3 w-full lg:w-auto">
                             <button
                                 onClick={() => navigate("/calculationproductbox")}
-                                className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-6 py-2 rounded-md shadow-md transition-colors text-sm"
+                                className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-lg shadow-md transition-colors text-sm w-full lg:w-auto"
                             >
                                 <ArrowLeft size={18} />
                                 Back to Calculator
                             </button>
                             <Button
-                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-6 py-2 rounded-md shadow-md flex items-center transition-colors text-base"
-                                style={{ minHeight: '40px', fontWeight: 'bold', borderRadius: '6px', padding: '8px 24px' }}
+                                className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-3 rounded-lg shadow-md flex items-center justify-center transition-colors text-sm w-full lg:w-auto"
+                                style={{ minHeight: '44px', fontWeight: 'bold', borderRadius: '8px' }}
                                 onClick={() => setOpenRemainingSpace(true)}
                             >
                                 Remaining space
