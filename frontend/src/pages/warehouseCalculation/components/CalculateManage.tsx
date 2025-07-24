@@ -318,7 +318,7 @@ export const CalculateManage = ({
           if (scrollRoot) scrollRoot.style.overflow = "auto";
         }}
       >
-        <StorageRebder storage={storage} shelfMap={shelfMap} cal_warehouse_id={cal_warehouse_id!} />
+        <StorageRender storage={storage} shelfMap={shelfMap} cal_warehouse_id={cal_warehouse_id!} />
       </DndContext>
     </div>
   );
@@ -328,7 +328,7 @@ const generateColor = (index: number) => {
   const hue = (index * 137.5) % 360; // แจก hue ให้กระจาย
   return `hsl(${hue}, 70%, 60%)`; // ปรับ saturation + lightness
 };
-export const StorageRebder = ({ storage, shelfMap, cal_warehouse_id }: { cal_warehouse_id: string, shelfMap: ShelfMap; storage: TypeWarehouseCompile }) => {
+export const StorageRender = ({ storage, shelfMap, cal_warehouse_id }: { cal_warehouse_id: string, shelfMap: ShelfMap; storage: TypeWarehouseCompile }) => {
   return (
     <div className="lg:p-4 space-y-6">
       <h2 className="text-xl font-bold">{`Warehouse: ${storage.master_warehouse_name}`}</h2>
