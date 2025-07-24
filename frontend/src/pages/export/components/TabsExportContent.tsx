@@ -62,7 +62,7 @@ export const TabsExportContent = ({
                 codeProduct.includes(keyword);
 
             // กรองตามเลขที่กล่อง
-            const matchesBoxSearch = !boxKeyword || boxNo.includes(boxKeyword);
+            const matchesBoxSearch = !boxKeyword || boxNo === boxKeyword;
 
             return matchesDocumentSearch && matchesBoxSearch;
         });
