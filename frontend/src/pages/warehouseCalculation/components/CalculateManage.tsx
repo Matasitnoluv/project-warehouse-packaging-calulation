@@ -52,15 +52,20 @@ const FormateCalBoxToShelfBoxStrorage = ({
   };
 };
 
-
-
+// ประเภทข้อมูลสำหรับเก็บประวัติการเปลี่ยนแปลง
+interface UndoHistory {
+  shelfMap: ShelfMap;
+  description: string;
+  timestamp: Date;
+}
 
 export const CalculateManage = ({
   storage,
   boxs,
   master_warehouse_id,
   cal_warehouse_id,
-  onCompiles
+  onCompiles,
+  onUndoAvailable
 }: CalculateManageProps) => {
 
   const sensors = useSensors(
@@ -71,6 +76,10 @@ export const CalculateManage = ({
 
   const [shelfMap, setShelfMap] = useState<ShelfMap>({});
   const initialShelfMap = useRef<ShelfMap>({}); // ✅ เก็บค่าเริ่มต้นเพื่อใช้เปรียบเทียบ
+
+  // เพิ่ม state สำหรับ Undo
+  const [undoHistory, setUndoHistory] = useState<UndoHistory[]>([]);
+  const [canUndo, setCanUndo] = useState(false);
 
   const StorageCompile = useCallback(() => {
     if (!storage) return {};
@@ -103,6 +112,26 @@ export const CalculateManage = ({
 
     return map;
   }, [storage]);
+
+  // ฟังก์ชันสำหรับเพิ่มประวัติการเปลี่ยนแปลง
+  const addToHistory = useCallback((shelfMap: ShelfMap, description: string) => {
+    setUndoHistory(prev => [...prev, {
+      shelfMap: _.cloneDeep(shelfMap),
+      description,
+      timestamp: new Date()
+    }]);
+    setCanUndo(true);
+  }, []);
+
+  // ฟังก์ชันสำหรับ Undo
+  const handleUndo = useCallback(() => {
+    if (undoHistory.length > 0) {
+      const lastHistory = undoHistory[undoHistory.length - 1];
+      setShelfMap(lastHistory.shelfMap);
+      setUndoHistory(prev => prev.slice(0, -1));
+      setCanUndo(undoHistory.length > 1);
+    }
+  }, [undoHistory]);
 
   const distributeBoxes = useCallback(
     (boxes: TypeCalBox[], shelfMap: ShelfMap): ShelfMap => {
@@ -270,18 +299,29 @@ export const CalculateManage = ({
           };
         } else {
           alert("❗ พื้นที่ shelf ไม่พอสำหรับกล่องนี้!");
+          return prev; // ไม่เปลี่ยนแปลง state
         }
       }
 
+      // เพิ่มประวัติการเปลี่ยนแปลง
+      const sourceShelfName = shelfMap[sourceShelfId]?.master_shelf_name || sourceShelfId;
+      const targetShelfName = newMap[targetShelfId!]?.master_shelf_name || targetShelfId;
+      const boxName = movedBox.cal_box?.document_product_no || movedBox.cal_box_id;
+
+      addToHistory(prev, `ย้ายกล่อง ${boxName} จาก ${sourceShelfName} ไป ${targetShelfName}`);
+
       return newMap;
     });
-  }, [shelfMap]);
+  }, [shelfMap, addToHistory]);
 
   // ✅ ใช้ครั้งแรก โหลดและเซฟค่าเริ่มต้นไว้ใน initialShelfMap
   useEffect(() => {
     const initialMap = StorageCompile();
     setShelfMap(initialMap);
     initialShelfMap.current = initialMap;
+    // ล้างประวัติเมื่อโหลดข้อมูลใหม่
+    setUndoHistory([]);
+    setCanUndo(false);
   }, [StorageCompile]);
 
   // ✅ หากมี box ใหม่ ให้จัดเรียง
@@ -291,6 +331,9 @@ export const CalculateManage = ({
     const filledMap = distributeBoxes(boxs, emptyMap);
     setShelfMap(filledMap);
     initialShelfMap.current = filledMap; // อัปเดต initial หากเป็นครั้งแรก
+    // ล้างประวัติเมื่อมีการจัดเรียงใหม่
+    setUndoHistory([]);
+    setCanUndo(false);
   }, [storage, boxs, StorageCompile, distributeBoxes]);
 
   // ✅ แจ้ง callback ว่าจัดเรียงแล้ว
@@ -298,6 +341,11 @@ export const CalculateManage = ({
     const allShelfBoxes: TypeShelfBoxStorage[] = Object.values(shelfMap).flatMap((shelf) => shelf.stored_boxes);
     onCompiles?.(allShelfBoxes);
   }, [onCompiles, shelfMap]);
+
+  // ✅ แจ้ง callback เกี่ยวกับ Undo availability
+  useEffect(() => {
+    onUndoAvailable?.(canUndo, handleUndo);
+  }, [canUndo, handleUndo, onUndoAvailable]);
 
   return (
     <div id="scroll-root" className="absolute inset-0 overflow-auto w-full">
@@ -318,7 +366,11 @@ export const CalculateManage = ({
           if (scrollRoot) scrollRoot.style.overflow = "auto";
         }}
       >
-        <StorageRender storage={storage} shelfMap={shelfMap} cal_warehouse_id={cal_warehouse_id!} />
+        <StorageRender
+          storage={storage}
+          shelfMap={shelfMap}
+          cal_warehouse_id={cal_warehouse_id!}
+        />
       </DndContext>
     </div>
   );
@@ -328,7 +380,15 @@ const generateColor = (index: number) => {
   const hue = (index * 137.5) % 360; // แจก hue ให้กระจาย
   return `hsl(${hue}, 70%, 60%)`; // ปรับ saturation + lightness
 };
-export const StorageRender = ({ storage, shelfMap, cal_warehouse_id }: { cal_warehouse_id: string, shelfMap: ShelfMap; storage: TypeWarehouseCompile }) => {
+export const StorageRender = ({
+  storage,
+  shelfMap,
+  cal_warehouse_id
+}: {
+  cal_warehouse_id: string,
+  shelfMap: ShelfMap;
+  storage: TypeWarehouseCompile;
+}) => {
   return (
     <div className="lg:p-4 space-y-6">
       <h2 className="text-xl font-bold">{`Warehouse: ${storage.master_warehouse_name}`}</h2>

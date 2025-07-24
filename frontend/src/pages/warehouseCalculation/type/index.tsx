@@ -103,6 +103,7 @@ export type CalculateManageProps = Partial<TypeCalWarehouse> & {
     boxs: TypeCalBox[];
     storageBoxs?: TypeShelfBoxStorage[];
     onCompiles?: React.Dispatch<React.SetStateAction<TypeShelfBoxStorage[]>>;
+    onUndoAvailable?: (canUndo: boolean, undoFunction: () => void) => void;
 }
 
 

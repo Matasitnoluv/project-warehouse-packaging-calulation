@@ -1,7 +1,20 @@
 import { useState, useEffect } from "react";
 
-export const HeaderExport = ({ children, onSearch, searchKeyword }: { children: React.ReactNode, onSearch?: (keyword: string) => void, searchKeyword?: string }) => {
+export const HeaderExport = ({
+    children,
+    onSearch,
+    searchKeyword,
+    onBoxSearch,
+    boxSearchKeyword
+}: {
+    children: React.ReactNode,
+    onSearch?: (keyword: string) => void,
+    searchKeyword?: string,
+    onBoxSearch?: (keyword: string) => void,
+    boxSearchKeyword?: string
+}) => {
     const [search, setSearch] = useState(searchKeyword || "");
+    const [boxSearch, setBoxSearch] = useState(boxSearchKeyword || "");
 
     const handleSearch = () => {
         const searchTerm = search.trim();
@@ -10,14 +23,30 @@ export const HeaderExport = ({ children, onSearch, searchKeyword }: { children: 
         }
     };
 
+    const handleBoxSearch = () => {
+        const boxSearchTerm = boxSearch.trim();
+        if (onBoxSearch) {
+            onBoxSearch(boxSearchTerm);
+        }
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") handleSearch();
+    };
+
+    const handleBoxKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter") handleBoxSearch();
     };
 
     // อัพเดท search state เมื่อ searchKeyword prop เปลี่ยน
     useEffect(() => {
         setSearch(searchKeyword || "");
     }, [searchKeyword]);
+
+    // อัพเดท boxSearch state เมื่อ boxSearchKeyword prop เปลี่ยน
+    useEffect(() => {
+        setBoxSearch(boxSearchKeyword || "");
+    }, [boxSearchKeyword]);
 
     return (
         <div className="max-w-7xl mx-auto mb-8">
@@ -33,17 +62,28 @@ export const HeaderExport = ({ children, onSearch, searchKeyword }: { children: 
                     </div>
 
                     {/* Search section */}
-                    <div className="flex items-center gap-3 w-full lg:w-auto">
+                    <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
                         <input
                             type="text"
-                            className="rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-base transition-all flex-1 lg:w-72"
-                            placeholder="ค้นหาเลขกล่องหรือเลขเอกสารสินค้า..."
+                            className="rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-base transition-all flex-1 lg:w-64"
+                            placeholder="ค้นหาเลขเอกสารสินค้า..."
                             value={search}
                             onChange={e => setSearch(e.target.value)}
                             onKeyDown={handleKeyDown}
                         />
+                        <input
+                            type="text"
+                            className="rounded-lg border border-gray-300 px-4 py-3 shadow-sm focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none text-base transition-all flex-1 lg:w-48"
+                            placeholder="ค้นหาเลขที่กล่อง..."
+                            value={boxSearch}
+                            onChange={e => setBoxSearch(e.target.value)}
+                            onKeyDown={handleBoxKeyDown}
+                        />
                         <button
-                            onClick={handleSearch}
+                            onClick={() => {
+                                handleSearch();
+                                handleBoxSearch();
+                            }}
                             className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg shadow transition-colors whitespace-nowrap"
                         >
                             ค้นหา

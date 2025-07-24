@@ -12,19 +12,30 @@ const ExportPage = () => {
   const [selectedZone, setZone] = useState<string>('');
   const [warehouseId, setWarehouseId] = useState<string>('');
   const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [boxSearchKeyword, setBoxSearchKeyword] = useState<string>('');
 
   const handleSearch = (keyword: string) => {
     setSearchKeyword(keyword);
   };
 
+  const handleBoxSearch = (keyword: string) => {
+    setBoxSearchKeyword(keyword);
+  };
+
   // ล้างการค้นหาเมื่อเปลี่ยน warehouse หรือ zone
   useEffect(() => {
     setSearchKeyword('');
+    setBoxSearchKeyword('');
   }, [warehouseId, selectedZone]);
 
   return (
     <ContainerExport>
-      <HeaderExport onSearch={handleSearch} searchKeyword={searchKeyword}>
+      <HeaderExport
+        onSearch={handleSearch}
+        searchKeyword={searchKeyword}
+        onBoxSearch={handleBoxSearch}
+        boxSearchKeyword={boxSearchKeyword}
+      >
         <div className="flex flex-col sm:flex-row gap-4 w-full">
           <SelectWarehouse warehouseId={warehouseId} setWarehouseId={setWarehouseId} />
           <SelectZoneSingle
@@ -35,7 +46,12 @@ const ExportPage = () => {
           />
         </div>
       </HeaderExport>
-      <TabsExport wareHouse={warehouseId} zone={selectedZone} searchKeyword={searchKeyword} />
+      <TabsExport
+        wareHouse={warehouseId}
+        zone={selectedZone}
+        searchKeyword={searchKeyword}
+        boxSearchKeyword={boxSearchKeyword}
+      />
     </ContainerExport>
   );
 };
